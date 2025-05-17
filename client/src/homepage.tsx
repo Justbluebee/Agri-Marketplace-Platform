@@ -1,6 +1,8 @@
 import { useState,useEffect } from 'react';
 import Navbar from './Navbar';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from './context/useauth';
+import { Role } from './data';
 
 async function getHomeData(setMessage: React.Dispatch<React.SetStateAction<string>>,
   setProducts: React.Dispatch<React.SetStateAction<any>>){
@@ -15,7 +17,6 @@ async function getHomeData(setMessage: React.Dispatch<React.SetStateAction<strin
   
   })
   const data = await response.json();
-     
   if (!response.ok) { 
       throw new Error(data.message || "Request failed")};
   
@@ -32,6 +33,8 @@ export type searchParams={
   type?:string;
 }
 function Homepage(){
+  const {userRole}=useAuth()
+  const isfarmer=userRole===Role.farmer
   const navigate=useNavigate()
   const [products, setProducts] = useState<any>(null);
   const [message,setMessage]=useState('')
@@ -76,7 +79,7 @@ function Homepage(){
   };
   function handleSearch(searchParams:searchParams,setMessage:React.Dispatch<React.SetStateAction<string>>){
     const filteredParams = Object.fromEntries(
-      Object.entries(searchParams).filter(([key, value]) => value !== '')
+      Object.entries(searchParams).filter(([_, value]) => value !== '')
     );
     if (!searchParams.location && !searchParams.name && !searchParams.type){
       setMessage('please enter at least one parameter')
@@ -89,7 +92,8 @@ function Homepage(){
     
     else if (searchParams.location || searchParams.name ||searchParams.type){ 
       const queryString = new URLSearchParams(filteredParams as Record<string, string>).toString();
-      navigate(`/product?${queryString}`);}
+      {isfarmer?(navigate(`/product/farmer?${queryString}`)):(navigate(`/product?${queryString}`))}
+      }
   }
     return (<>
     <div className='hero'>
@@ -101,7 +105,11 @@ function Homepage(){
           Source fresh produce and grains directly from local farms.<br />
           Connecting buyers and farmers for fair, transparent trade.
         </p>
-        <Link to={'/product'} className="explore-btn">Explore Marketplace</Link>
+        {isfarmer?(
+          <Link to={'/product/farmer'} className="explore-btn">View My products</Link>
+        ):(
+          <Link to={'/product'} className="explore-btn">Explore Marketplace</Link>)}
+        
       </div>
       <p className='message'>{message}</p>
       <div className="search-box">

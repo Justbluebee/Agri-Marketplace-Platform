@@ -1,8 +1,10 @@
 import { createContext, useEffect, useState, ReactNode } from "react";
-
+import { Role } from "../data";
 interface AuthContextType {
   isLoggedin: boolean;
   username: string | null;
+  userid:string ;
+  userRole:string;
   checkAuth: () => void;
   logout: () => Promise<void>;
   setIsLoggedin: (value: boolean) => void;
@@ -13,6 +15,8 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+  const [userid,setID]=useState<string>('guest');
+  const [userRole,setRole]=useState<Role>(Role.guest);
 
   // Fetch auth status ONCE when the app loads
   const checkAuth = async () => {
@@ -24,9 +28,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         setIsLoggedin(data.isLoggedin);
         setUsername(data.username);
+        setID(data.id)
+        setRole(data.role)
+        
       } else {
         setIsLoggedin(false);
         setUsername(null);
+        setID('guest');
+        setRole(Role.guest)
       }
     } catch (error) {
       console.error("Error checking auth:", error);
@@ -47,16 +56,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       setIsLoggedin(false);
       setUsername(null);
+      setID('guest')
+      setRole(Role.guest)
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedin, username, checkAuth, logout,setIsLoggedin}}>
+    <AuthContext.Provider value={{ isLoggedin, username,userid,userRole, checkAuth, logout,setIsLoggedin}}>
       {children}
     </AuthContext.Provider>
   );
 }
-
-// Custom hook to use auth context
