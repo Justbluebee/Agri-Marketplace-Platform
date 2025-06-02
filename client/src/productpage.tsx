@@ -38,7 +38,7 @@ import { capitalizeFirstLetter } from "./utils/general";
   
     return (
       <div className="app">
-        {(isfarmer)?(<h1> My Products</h1>):(<h1>Products</h1>)}
+        {(isfarmer)?(<h1> My {}Products</h1>):(<h1>{}Products</h1>)}
         {(isfarmer)?(
           <Link to="/product/farmer" className="browse-link">Browse All</Link>):(
           <Link to="/product" className="browse-link">Browse All</Link>)}
@@ -47,13 +47,15 @@ import { capitalizeFirstLetter } from "./utils/general";
         {categories.map((category) => {
           const filtered = products.filter((p) => p.type === category);
           if (filtered.length === 0) return null;
-  
+          
           return (
             <div className="category" key={category}>
               <h2>{readableProductType(category)}</h2>
               <div className="card-container">
                 {filtered.map((product) => {
                   const imageUrl = extractImage(product.images);
+                  console.log(imageUrl)
+                  
                   return (
                     <div className="card" key={product.id}onClick={()=>handleSearch(product.id)}>
                       {imageUrl && (

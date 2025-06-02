@@ -1,11 +1,14 @@
 import { createContext, useEffect, useState, ReactNode } from "react";
 import { Role } from "../data";
+
+const url=import.meta.env.VITE_SERVER_URL
+
 interface AuthContextType {
   isLoggedin: boolean;
   username: string | null;
   userid:string ;
   userRole:string;
-  checkAuth: () => void;
+  checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
   setIsLoggedin: (value: boolean) => void;
 }
@@ -19,12 +22,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole,setRole]=useState<Role>(Role.guest);
 
   // Fetch auth status ONCE when the app loads
-  const checkAuth = async () => {
+  const checkAuth = async ():Promise<void> => {
     try {
-      const response = await fetch("http://localhost:5000/auth-status", {
+      // await fetch(`${url}/session-debug`, {
+      // credentials: "include"
+      // }).then(res => res.json());
+      const response = await fetch(`${url}/auth-status`, {
         credentials: "include",
       });
       const data = await response.json();
+
       if (response.ok) {
         setIsLoggedin(data.isLoggedin);
         setUsername(data.username);
@@ -43,14 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  useEffect(() => {
-    checkAuth(); // Call on mount
-  }, []);
+ useEffect(() => {
+    checkAuth(); 
+    
+  }, [isLoggedin]);
 
   // Logout function (updates global state)
   const logout = async () => {
     try {
-      await fetch("http://localhost:5000/logout", {
+      await fetch(`${url}/logout`, {
         method: "DELETE",
         credentials: "include",
       });

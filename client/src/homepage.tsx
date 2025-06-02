@@ -4,11 +4,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/useauth';
 import { Role } from './data';
 
+const url=import.meta.env.VITE_SERVER_URL
+
 async function getHomeData(setMessage: React.Dispatch<React.SetStateAction<string>>,
   setProducts: React.Dispatch<React.SetStateAction<any>>){
    
   try{
-  const response=await fetch(`http://localhost:5000/home`,{
+   
+  const response=await fetch(`${url}/home`,{
       method: "GET",
       headers: {
         "Content-Type": "application/json", 
@@ -17,6 +20,7 @@ async function getHomeData(setMessage: React.Dispatch<React.SetStateAction<strin
   
   })
   const data = await response.json();
+ 
   if (!response.ok) { 
       throw new Error(data.message || "Request failed")};
   

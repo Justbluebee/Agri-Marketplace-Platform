@@ -7,10 +7,10 @@ import { Link,useNavigate } from 'react-router-dom';
 type Loginform={
     email:string
     password:string}
-
+const url=import.meta.env.VITE_SERVER_URL
 async function login(formData:Loginform,
     setMessage: React.Dispatch<React.SetStateAction<string>>,
-    setIsLoggedin: (value: boolean) => void  ,
+     checkAuth: () => Promise<void>, 
     navigate: (path: string) => void){
    
 
@@ -18,7 +18,7 @@ async function login(formData:Loginform,
         setMessage('Error: Enter a valid username and password');
       return;}
     try{
-    const response=await fetch("http://localhost:5000/login",{
+    const response=await fetch(`${url}/login`,{
         method: "POST",
         headers: {
           "Content-Type": "application/json", 
@@ -39,9 +39,12 @@ async function login(formData:Loginform,
     else if (!response.ok) { 
         throw new Error(data.message || "Login failed")};
     
-    setIsLoggedin(true);
-    setMessage(`Welcome, ${data.username || "User"}!`)
-    navigate('/');
+    if (response.ok){
+       await checkAuth();    
+      setMessage(`Welcome, ${data.username || "User"}!`)
+      navigate('/');
+    }
+    
         }
     catch(error:any) {
         console.error("Error logging in:", error);
@@ -54,7 +57,7 @@ function LoginPage(){
     const [formData, setFormData]=useState({email:'',password:''})
     const [message, setMessage] = useState<string>("")
     const navigate = useNavigate();
-    const { isLoggedin, setIsLoggedin } = useAuth();
+    const { isLoggedin,checkAuth} = useAuth();
     
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         
@@ -62,11 +65,12 @@ function LoginPage(){
     
     if (isLoggedin){return  <Navigate to="/" />;}
     const handleLogin = async () => {
-        await login(formData, setMessage, setIsLoggedin, navigate);
+        await login(formData, setMessage, checkAuth, navigate);
       };
     return(<>
 
     <div className="login-page">
+      
       <div className="login-card">
         <h1 className="login-title">Welcome Back</h1>
         <p className="login-subtitle">Log in to continue</p>
