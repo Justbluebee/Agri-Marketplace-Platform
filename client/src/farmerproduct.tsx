@@ -15,6 +15,7 @@ type Props = {
 };
 
 const ProductDetail: React.FC<Props> = ({ product }) => {
+
   const [isEdit, setIsEdit] = useState(false);
   const queryClient=useQueryClient()
   const [editedProduct, setEditedProduct] = useState<Product>({ ...product });
@@ -129,7 +130,6 @@ const ProductDetail: React.FC<Props> = ({ product }) => {
               </label>
               Service Delivery:
               <label >
-                
                 <input type="checkbox" checked={editedProduct.servicedelivery} onChange={(e) => setEditedProduct({ ...editedProduct, servicedelivery: e.target.checked })} />
               </label>
               <button onClick={handleSave}>Save</button>

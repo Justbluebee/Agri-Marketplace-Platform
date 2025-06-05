@@ -23,17 +23,24 @@ const initialState: Productform = {
   supplierthreshold: 0,
   farmerdelivery: false,
   status: ProductStatus.AVAILABLE,
+<<<<<<< HEAD
   images:[]
+=======
+  images:null
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
 };
 
 const ProductForm: React.FC = () => {
   const [form, setForm] = useState<Productform>(initialState);
   const [errors, setErrors] = useState<{ [K in keyof Productform]?: string }>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
+<<<<<<< HEAD
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const [imageError, setImageError] = useState<string | null>(null);
 
+=======
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
 
  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
   const { name, value, type } = e.target;
@@ -57,7 +64,10 @@ const ProductForm: React.FC = () => {
   };
 
 const handleSubmit = async (e: React.FormEvent) => {
+<<<<<<< HEAD
     const formData = new FormData();
+=======
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
   e.preventDefault();
   const validationErrors = validate();
   if (Object.keys(validationErrors).length > 0) {
@@ -67,6 +77,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     if (imageFile) {
+<<<<<<< HEAD
       
     
     formData.append('name', form.name);
@@ -95,6 +106,13 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
     
     
+=======
+      form.images=imageFile;
+    }
+    postProduct(form)
+    alert("Product submitted successfully!");
+    setForm(initialState)
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
 
   } catch (error) {
     console.error(error);
@@ -162,6 +180,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       </label>
       <label>
         Product Image:
+<<<<<<< HEAD
         {imageError && <span className="error">{imageError}</span>}
 
         <input
@@ -187,6 +206,16 @@ const handleSubmit = async (e: React.FormEvent) => {
         }}
         />
         </label>
+=======
+        <input type="file" accept="image/*" onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+            setImageFile(e.target.files[0]);
+            }
+        }} />
+        </label>
+
+
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
       <label>
         Location:
         <select name="location" value={form.location} onChange={handleChange}>
@@ -197,14 +226,27 @@ const handleSubmit = async (e: React.FormEvent) => {
         </select>
         {errors.location && <span className="error">{errors.location}</span>}
       </label>
+<<<<<<< HEAD
+=======
+
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
       <label>
         Supplier Discount (%):
         <input type="number" name="discount" value={form.discount} onChange={handleChange} />
       </label>
+<<<<<<< HEAD
+=======
+
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
       <label>
         Supplier Threshold:
         <input type="number" name="supplierthreshold" value={form.supplierthreshold} onChange={handleChange} />
       </label>
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
       <label>
         Farmer Delivery(Will you facilitate order delivery for this product):
         <input type="checkbox" name="farmerdelivery" checked={form.farmerdelivery} onChange={handleChange} />
@@ -214,6 +256,12 @@ const handleSubmit = async (e: React.FormEvent) => {
     </form>
   );
 };
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
 function NewProductPage(){
     return(<div className='full-page'>
     <Navbar/>

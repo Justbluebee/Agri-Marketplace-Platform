@@ -24,6 +24,11 @@ export type Product = {
     review: Review[];
     order: Order[];
   };
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
 export type Productform = {
     name: string;
     type: ProductType;
@@ -38,9 +43,16 @@ export type Productform = {
     supplierthreshold: number;
     farmerdelivery: boolean;
     status: ProductStatus;
+<<<<<<< HEAD
     images:File[]
 
   };
+=======
+    images:any
+
+  };
+>>>>>>> Stashed changes
+>>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
   // Enums
 export enum DeliveryType {
     BUYER = 'BUYER',
