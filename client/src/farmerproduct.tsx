@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './ProductDetail.css';
-import { Product, ProductType} from './data';
+import { Product,ProductType} from './data';
 import { useSearchParams} from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getSingleProduct } from './api/getproducts';
@@ -8,7 +8,7 @@ import Navbar from './Navbar';
 import { capitalizeFirstLetter } from './utils/general';
 import { patchProduct } from './api/getproducts';
 import { useQueryClient } from '@tanstack/react-query';
-
+const url=import.meta.env.VITE_SERVER_URL
 
 type Props = {
   product: Product;
@@ -80,11 +80,11 @@ const ProductDetail: React.FC<Props> = ({ product }) => {
     <div className="product-detail-container">
       <div className="product-detail-grid">
         <div className="product-image-section">
-          <img src={images[0] || '/placeholder.jpg'} alt={product.name} className="main-image" />
+          <img src={url+images[0] || '/placeholder.jpg'} alt={product.name} className="main-image" />
           <div className="thumbnail-row">
             {images.slice(1, 4).map((img: string, index: number) => (
               <div key={index} className="thumbnail-wrapper">
-                <img src={img} alt={`thumb-${index}`} className="thumbnail" />
+                <img src={url+img} alt={`thumb-${index}`} className="thumbnail" />
                 {isEdit && <button onClick={() => handleImageRemove(index)}>Remove</button>}
               </div>
             ))}
@@ -191,13 +191,12 @@ const ProductDetail: React.FC<Props> = ({ product }) => {
 
 export default function FarmerDetailPage() {
   const [searchParams] = useSearchParams();
-          const type = searchParams.get('type') || '';
-          const uppername = searchParams.get('name') || '';
-          const name = capitalizeFirstLetter(uppername);
-          const location = searchParams.get('location') || '';
-          const id = searchParams.get('id') || '';
-          const queryParams = { name, type, location,id };
-
+  const type = searchParams.get('type') || '';
+  const uppername = searchParams.get('name') || '';
+  const name = capitalizeFirstLetter(uppername);
+  const location = searchParams.get('location') || '';
+  const id = searchParams.get('id') || '';
+  const queryParams = { name, type, location,id };
 
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', queryParams],

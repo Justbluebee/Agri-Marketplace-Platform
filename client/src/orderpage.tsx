@@ -8,6 +8,8 @@ import './productDetail.css'
 import React from 'react';
 import { Product } from './data'; 
 import './orderPage.css';
+const url=import.meta.env.VITE_SERVER_URL
+
 export type newOrder={
     productid:string
     farmerid:string
@@ -81,7 +83,9 @@ function OrderPage(){
       };
     async function handleBuy(){
         await postOrders(productOrder)
-         navigate(`/tracking/${1}`)
+        const productIds: string[] = productOrder.map((order) => order.productid);
+        productIds.forEach(id => {removeFromCart(id)}); 
+        navigate(`/tracking/${1}`)
       };
       
     return (
@@ -93,7 +97,7 @@ function OrderPage(){
             {productsWithQuantities.map(product => (
             <div key={product.id} className="checkout-item">
                 <img
-                src={Array.isArray(product.images) ? product.images[0] : '/placeholder.jpg'}
+                src={Array.isArray(product.images) ? url+product.images[0] : '/placeholder.jpg'}
                 alt={product.name}
                 className="product-thumb"
                 />

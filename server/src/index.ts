@@ -8,7 +8,8 @@ import { PrismaClient ,order_customertype as DeliveryType} from "../generated/pr
 import { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import MySQLStoreFactory from 'express-mysql-session';
-  import multer from 'multer';
+import upload from "./imageupload";
+const router = express.Router();
 enum normaluser {
   buyer='buyer',
   supplier='supplier',
@@ -67,7 +68,8 @@ app.use(session({
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions)); 
-app.use(express.json());
+
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(flash())
 
 initialize(passport)
@@ -75,13 +77,13 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 async function findUserByEmail(email:string){
-  const myuser=await prisma.user.findUnique({where:{email:email} })
+  const myuser=await prisma.user.findUnique({where:{email:email,isactive:true}})
   if(myuser){
     const usertype=myuser.usertype
-    const userdata=await (prisma as any)[usertype].findUnique({where:{email:email} })
+    const userdata=await (prisma as any)[usertype].findUnique({where:{email:email,isactive:true} })
     return userdata}
 }
-    
+  
 async function findById(id:string){
     const myuser= await prisma.user.findUnique({where:{id:id} })
     if(myuser){return myuser}
@@ -123,16 +125,8 @@ function initialize(passport:any){
 });
 }
 
-const storage = multer.diskStorage({
-  destination: 'public/images',
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
-  },
-});
-const upload = multer({ storage });
-
 function checkAuth(req:Request,res:Response,next:any){res.set("Cache-Control", "no-store");
+ 
   if (req.isAuthenticated()){return next()}
   
   return res.status(401).json({ message: "Unauthorized. Please log in." }); 
@@ -166,6 +160,34 @@ async function finduserRole(userId:string){
 //     user: req.user
 //   });
 // });
+app.post('/product/farmer',checkAuth, upload.array('images', 5),async(req: Request, res: Response)=>{
+    try{console.log('inside api')
+
+        const values = req.body
+        const farmerid=(req.user as User).id
+        const imageurls:any=[];
+        (req.files as Express.Multer.File[]).forEach((file) => {
+        imageurls.push(`/uploads/${file.filename}`);});
+        const productData = {
+       ...values,
+        priceperunit: parseFloat( values.priceperunit),
+        quantity: parseInt(values.quantity, 10),
+        discount: parseFloat(values.discount),
+        supplierthreshold: parseInt(values.supplierthreshold, 10),
+        farmerdelivery: values.farmerdelivery === 'true',
+        
+      };
+        const myproducts = await prisma.product.create({  data: { ...productData, images:imageurls,farmerid:farmerid } });
+        res.json(myproducts.status);
+        console.log('products created')
+    }catch(error){
+        console.error("Error in /products creation",error);
+        res.status(500).json({message:"Internal server error"});
+    }finally {
+        await prisma.$disconnect();
+    }
+});
+app.use(express.json({ limit: '10mb' }));
 console.log('login')
 app.post("/login",notAuth, (req: Request, res: Response,next) => {
   passport.authenticate('local',(err:any, user:any) => {
@@ -239,9 +261,9 @@ app.delete("/logout", (req: Request, res: Response, next) => {
       if (err) {return `server error, ${err}`}
       res.status(200).json({ message: "Logged out successfully" });});
   });
-console.log('auth')
-console.log('inside auth')
+
 app.get("/auth-status", (req, res) => {res.set("Cache-Control", "no-store");
+  console.log('aauth status accessed')
   console.log(req.isAuthenticated())
 
   res.json({
@@ -253,6 +275,7 @@ app.get("/auth-status", (req, res) => {res.set("Cache-Control", "no-store");
 });
 const buildProductFilter = (input: {
   id?:string;
+  farmerid?:string;
   name?: string;
   type?: string;
   location?: string;
@@ -268,6 +291,9 @@ const buildProductFilter = (input: {
   if (input.name) {
    
     where.name = { contains: input.name };
+  } if (input.farmerid) {
+   
+    where.farmerid = { contains: input.farmerid };
   }
 
   if (input.type) {
@@ -295,10 +321,11 @@ const buildProductFilter = (input: {
 app.get('/home',async(req: Request, res: Response)=>{
     try{
       const myproducts = await prisma.product.findMany({select:{type:true,location:true,name:true}});
+      console.log(myproducts)
       const types = [...new Set(myproducts.map(item => item.type))];
       const locations = [...new Set(myproducts.map(item => item.location))];
       const names = [...new Set(myproducts.map(item => item.name))];
-      res.json({locations,types,names});
+      res.json({locations,types,names,myproducts});
       console.log('homedata sent')
     }catch(error){
       console.error("Error in /home",error);
@@ -309,23 +336,25 @@ app.get('/home',async(req: Request, res: Response)=>{
   });
 app.get('/product',async(req: Request, res: Response)=>{
   try{
-    console.log('i made it')
+   
     if (!req.user) {
     res.status(401).json({ message: 'Unauthorized: No user info found' });
     return}
 
     const isfarmer=(req.user as User).usertype===Role.farmer
     console.log(isfarmer)
+    console.log(req.query)
     const userid=(req.user as User).id
     let myproducts=[]
     let result;
     if (req.query){
+      console.log('its here')
     const filters = buildProductFilter(req.query);
 
     myproducts = await prisma.product.findMany({
       
       where: {
-        ...(isfarmer && { farmerid: userid}),
+        ...(isfarmer &&filters.farmerid && { farmerid: userid}),
         ...(filters.id && { id: filters.id}),
         ...(filters.name && { name: filters.name}),
         ...(filters.type && {type: filters.type }),
@@ -338,12 +367,17 @@ app.get('/product',async(req: Request, res: Response)=>{
 
       if (!req.query || myproducts.length==0) {
      
-        const myproducts=await prisma.product.findMany({where:{...(isfarmer &&{farmerid:userid})}})
+        const myproducts=await prisma.product.findMany()
         result='all'
+        if (isfarmer &&req.query){
+
+          
+          result='emptyfarmer'
+        }
         res.json({myproducts,result})
         
       }
-      console.log(result)
+      
     ;
     console.log('product types sent')
   }catch(error){
@@ -380,34 +414,9 @@ app.post('/product/checkout',checkAuth,async(req: Request, res: Response)=>{
   }
 });
 
-app.get('/product/farmer',checkAuth,async(req: Request, res: Response)=>{
-    try{
-        const value=(req.user as User).id
-        const myproducts = await prisma.product.
-        findMany({ where: { farmerid: value },include: { review: true },  });
-        res.json({myproducts});
-        console.log('products sent')
-    }catch(error){
-        console.error("Error in /products retrieval",error);
-        res.status(500).json({message:"Internal server error"});
-    }finally {
-        await prisma.$disconnect();
-    }
-});
 
-app.post('/product/farmer',checkAuth,async(req: Request, res: Response)=>{
-    try{
-        const values = req.body
-        const myproducts = await prisma.product.create({ data: values });
-        res.json({myproducts});
-        console.log('products created')
-    }catch(error){
-        console.error("Error in /products creation",error);
-        res.status(500).json({message:"Internal server error"});
-    }finally {
-        await prisma.$disconnect();
-    }
-});
+
+
 app.patch('/product/farmer',checkAuth, upload.array('images'),async(req: Request, res: Response)=>{
     try{
      
@@ -520,13 +529,66 @@ app.get('/order',checkAuth,async(req:Request,res:Response)=>{
         await prisma.$disconnect();
     }
 })
+app.get('/profile',checkAuth,async(req: Request, res: Response)=>{
+    try{
+        const value=(req.user as User).id
+        const usertype=(req.user as User).usertype
+        const myprofile = await (prisma as any)[usertype].
+        findUnique({ where: { id: value }  });
+        res.json(myprofile);
+        console.log(myprofile)
+
+        console.log('profile sent')
+    }catch(error){
+        console.error("Error in /profile retrieval",error);
+        res.status(500).json({message:"Internal server error"});
+    }finally {
+        await prisma.$disconnect();
+    }
+});
+app.patch('/profile',checkAuth,async(req: Request, res: Response)=>{
+    try{
+      const values=req.body
+      console.log(values)
+        const userid=(req.user as User).id
+        const usertype=(req.user as User).usertype
+        const myprofile = await (prisma as any)[usertype].
+        update({ where: { id: userid },data: values});
+        res.json(myprofile);
+
+        console.log('profile updated')
+    }catch(error){
+        console.error("Error in /profile update",error);
+        res.status(500).json({message:"Internal server error"});
+    }finally {
+        await prisma.$disconnect();
+    }
+});
+app.delete('/profile',checkAuth,async(req: Request, res: Response)=>{
+    try{
+        const userid=(req.user as User).id
+        const usertype=(req.user as User).usertype
+        const [user, myprofile] = await Promise.all([
+          (prisma as any)[usertype].update({ where: { id: userid },data: { isactive: false }}),
+          prisma.user.update({ where: {id: userid },data: { isactive: false }}),
+        ]);
+        res.json(user&&myprofile)
+
+        console.log('profile deleted')
+    }catch(error){
+        console.error("Error in /profile deletion",error);
+        res.status(500).json({message:"Internal server error"});
+    }finally {
+        await prisma.$disconnect();
+    }
+});
 console.log("Registered routes:");
 app._router.stack.forEach((r:any) => {
   if (r.route) {
     console.log(r.route.path);
   }
 });
-
+app.use('/uploads', express.static('uploads'));
 app.listen(PORT, () => {
   console.log(`Server is running on port:${PORT}`);
 });
