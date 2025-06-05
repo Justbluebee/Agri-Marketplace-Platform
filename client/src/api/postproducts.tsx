@@ -2,16 +2,7 @@
 
 const url=import.meta.env.VITE_SERVER_URL
 export async function postProduct(product:any):Promise<number>{
-    try{console.log('inside postproduct')
-        for (let [key, value] of product.entries()) {
-    console.log(`${key}:`, value);}
-=======
-import { Productform } from "../data";
-const url=import.meta.env.VITE_SERVER_URL
-
-export async function postProduct(product:Productform):Promise<number>{
     try{
->>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
         
     const query=`${url}/product/farmer`
 
@@ -21,14 +12,7 @@ export async function postProduct(product:Productform):Promise<number>{
     
         credentials: "include",
         body:product
-=======
-        headers: {
-          "Content-Type": "application/json", 
-        },
-        credentials: "include",
-        body:JSON.stringify(product)
->>>>>>> ef0a7b054815965c58113718d93a716f1ebb678d
-       
+
     })
     const result = await response.json(); 
     
@@ -39,6 +23,6 @@ export async function postProduct(product:Productform):Promise<number>{
     return result}
 
     catch(error:any) {
-        console.error("Errorposting product:", error);
+        console.error("Error posting product:", error);
         throw new Error(error)} 
   }
