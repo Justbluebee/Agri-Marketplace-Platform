@@ -196,6 +196,5 @@ enum order_tracking {
   DELIVERED
   ENROUTE
   PACKING
-  PACKED
+  PACKED
 }
-

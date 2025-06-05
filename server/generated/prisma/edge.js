@@ -383,7 +383,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Admin\\Downloads\\january 2025\\React JS\\Agri-marketplace-server\\server\\generated\\prisma",
+      "value": "C:\\Users\\hp\\OneDrive\\Documents\\MY CODE PROJECTS\\Agri-platform app\\Agri-Marketplace-Platform\\server\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -397,7 +397,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Admin\\Downloads\\january 2025\\React JS\\Agri-marketplace-server\\server\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\hp\\OneDrive\\Documents\\MY CODE PROJECTS\\Agri-platform app\\Agri-Marketplace-Platform\\server\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

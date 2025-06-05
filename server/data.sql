@@ -155,12 +155,12 @@ CREATE TABLE `myorder` (
   `userId` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `quantity` int NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `Order_productid_fkey` (`productid`),
-  KEY `Order_farmerid_fkey` (`farmerid`),
-  KEY `Order_userId_fkey` (`userId`),
-  CONSTRAINT `Order_farmerid_fkey` FOREIGN KEY (`farmerid`) REFERENCES `farmer` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `Order_productid_fkey` FOREIGN KEY (`productid`) REFERENCES `product` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `Order_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  KEY `myorder_productid_fkey` (`productid`),
+  KEY `myorder_farmerid_fkey` (`farmerid`),
+  KEY `myorder_userId_fkey` (`userId`),
+  CONSTRAINT `myorder_farmerid_fkey` FOREIGN KEY (`farmerid`) REFERENCES `farmer` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `myorder_productid_fkey` FOREIGN KEY (`productid`) REFERENCES `product` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `myorder_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
