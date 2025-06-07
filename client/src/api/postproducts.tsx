@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 const url=import.meta.env.VITE_SERVER_URL
 export async function postProduct(product:any):Promise<number>{
@@ -8,7 +7,6 @@ export async function postProduct(product:any):Promise<number>{
 
     const response=await fetch(query,{
         method: "POST",
-<<<<<<< HEAD
     
         credentials: "include",
         body:product

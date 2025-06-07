@@ -56,17 +56,18 @@ const url=import.meta.env.VITE_SERVER_URL
       <div className="app">
         {(isfarmer && result=='search')?(<h1> My Products</h1>):(<h1>Products</h1>)}
         {(isfarmer && result=='search')?(<>
+        
           
           <Link to="/product" className="browse-link">Back to marketplace</Link></>):(
           <Link to="/product" className="browse-link">Browse All</Link>)}
-          
+          {isfarmer &&<button onClick={()=>handleAdd()}>Add a product</button>}
 
   
         {categories.map((category) => {
           const filtered = products.filter((p) => p.type === category);
           if (filtered.length === 0 ) {
             return null
-          };
+          }; 
           
           return (
             <div className="category" key={category}>
